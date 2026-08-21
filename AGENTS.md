@@ -10,6 +10,8 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - Contracts flow is one-way: Zod in `packages/contracts/src/` → `npm run contracts:openapi` → `openapi.json` → `npm run contracts:pydantic` → `services/scoring/src/scoring/contracts_gen.py`. Never hand-edit `openapi.json` or `contracts_gen.py`; a pytest enforces sync.
 - Python toolchain is uv-managed (Python 3.12 pinned, `.venv` in `services/scoring`); use `uv run ...` inside that directory.
 - Sharp edge: `datamodel-codegen` output formatting depends on the `--output` path; always generate to a temp file and copy (`scripts/gen-pydantic.sh` does this) or the drift test fails spuriously.
+- Backend core (webhook/triage/compliance/scheduler/audit/replay) lives in `apps/web/src/lib`; see `docs/architecture.md` §Backend core for the module map. Route tests inject stores via `setRuntimeForTests()` (`src/lib/runtime.ts`) — never stub globals.
+- Web coverage gates (≥80% on triage/compliance/scheduler/audit) run via `vitest --coverage` in `apps/web` (`npm run test -w @hackguard/web`); adding files under those dirs pulls them into the threshold.
 
 ## Maintaining this file
 
