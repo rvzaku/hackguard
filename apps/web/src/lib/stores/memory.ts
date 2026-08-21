@@ -1,4 +1,4 @@
-import type { AuditEntry, PaymentFailedEvent, ReplayEvent } from '@hackguard/contracts';
+import type { AuditEntry, Decision, PaymentFailedEvent, ReplayEvent } from '@hackguard/contracts';
 
 import type { AuditLogStore } from '../audit/chain.js';
 import type { IdempotencyStore } from '../idempotency.js';
@@ -47,6 +47,15 @@ export interface ReplayStore {
   getStream(streamId: string): Promise<ReplayStreamRecord | null>;
   saveRun(run: ReplayRunRecord): Promise<void>;
   getRun(runId: string): Promise<ReplayRunRecord | null>;
+  /** Most recent run by creation time — drives GET /api/replay. */
+  latestRun(): Promise<ReplayRunRecord | null>;
+}
+
+/** Persisted decision feed (plan §3: /api/decisions + stored SHAP). */
+export interface DecisionStore {
+  save(decision: Decision): Promise<void>;
+  /** Newest first. */
+  list(limit?: number): Promise<Decision[]>;
 }
 
 export class InMemoryPaymentEventStore implements PaymentEventStore {
@@ -116,6 +125,26 @@ export class InMemoryReplayStore implements ReplayStore {
   async getRun(runId: string): Promise<ReplayRunRecord | null> {
     return this.runs.get(runId) ?? null;
   }
+
+  async latestRun(): Promise<ReplayRunRecord | null> {
+    let newest: ReplayRunRecord | null = null;
+    for (const run of this.runs.values()) {
+      if (!newest || run.createdAt > newest.createdAt) newest = run;
+    }
+    return newest;
+  }
+}
+
+export class InMemoryDecisionStore implements DecisionStore {
+  private readonly byPaymentId = new Map<string, Decision>();
+
+  async save(decision: Decision): Promise<void> {
+    this.byPaymentId.set(decision.paymentId, decision);
+  }
+
+  async list(limit = 200): Promise<Decision[]> {
+    return [...this.byPaymentId.values()].slice(-limit).reverse();
+  }
 }
 
 /** Bundled runtime dependencies shared by the API routes. */
@@ -123,6 +152,7 @@ export interface Runtime {
   payments: PaymentEventStore;
   audit: AuditLogStore;
   replays: ReplayStore;
+  decisions: DecisionStore;
   idempotency: IdempotencyStore;
 }
 
@@ -131,6 +161,7 @@ export function inMemoryRuntime(): Runtime {
     payments: new InMemoryPaymentEventStore(),
     audit: new InMemoryAuditLogStore(),
     replays: new InMemoryReplayStore(),
+    decisions: new InMemoryDecisionStore(),
     idempotency: new InMemoryIdempotencyStore(),
   };
 }

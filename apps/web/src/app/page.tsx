@@ -26,6 +26,25 @@ export default function Home() {
   const replay = useApiResource((signal) => api.getReplay({ signal }), { pollMs: 3000 });
   const evalLoop = useApiResource((signal) => api.getEvalLoop({ signal }), { pollMs: 10000 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [bootstrapping, setBootstrapping] = useState(false);
+  const [bootstrapError, setBootstrapError] = useState<string | null>(null);
+
+  async function runDemo() {
+    setBootstrapping(true);
+    setBootstrapError(null);
+    try {
+      await api.runDemoBootstrap();
+      decisions.refresh();
+      replay.refresh();
+    } catch (cause) {
+      setBootstrapError(cause instanceof Error ? cause.message : 'Demo bootstrap failed');
+    } finally {
+      setBootstrapping(false);
+    }
+  }
+
+  const isEmpty =
+    !decisions.loading && !decisions.error && (decisions.data?.decisions.length ?? 0) === 0;
 
   const selectedDecision = useMemo(
     () =>
@@ -37,12 +56,26 @@ export default function Home() {
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 p-6 lg:p-10">
-      <header>
-        <h1 className="text-2xl font-bold tracking-tight">HackGuard</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Decision brain above Stripe&apos;s built-in retries — triage, timed retries, network-rule
-          guardrails, hash-chained audit.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">HackGuard</h1>
+          <p className="mt-1 text-sm text-neutral-500">
+            Decision brain above Stripe&apos;s built-in retries — triage, timed retries, network-rule
+            guardrails, hash-chained audit.
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            type="button"
+            onClick={runDemo}
+            disabled={bootstrapping}
+            data-testid="run-demo"
+            className="rounded border border-emerald-800 bg-emerald-950/60 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-900/50 disabled:opacity-50"
+          >
+            {bootstrapping ? 'Running demo…' : isEmpty ? 'Load demo data' : 'Re-run demo replay'}
+          </button>
+          {bootstrapError ? <p className="text-xs text-red-400">{bootstrapError}</p> : null}
+        </div>
       </header>
 
       <section aria-label="Decision feed and explanation">
@@ -83,10 +116,13 @@ export default function Home() {
           <LoadingSkeleton rows={2} />
         ) : replay.error ? (
           <ErrorState error={replay.error} onRetry={replay.refresh} />
-        ) : replay.data ? (
+        ) : replay.data && replay.data.series.length > 0 ? (
           <ReplayCounters replay={replay.data} />
         ) : (
-          <EmptyState title="No replay data" />
+          <EmptyState
+            title="No replay run yet"
+            hint="Use “Load demo data” above, or POST /api/replay/seed + /api/replay/run with your captured stream."
+          />
         )}
       </section>
 

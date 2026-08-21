@@ -6,7 +6,6 @@ import { AuditEntrySchema, DecisionSchema } from '@hackguard/contracts';
  * /api/decisions, /api/replay, /api/audit). Composed from the frozen
  * @hackguard/contracts schemas so the UI can never drift from the backend.
  */
-
 export const DecisionFeedSchema = z.object({
   decisions: z.array(DecisionSchema),
 });
@@ -53,3 +52,14 @@ export const SimulateViolationResultSchema = z.object({
   auditEntry: AuditEntrySchema,
 });
 export type SimulateViolationResult = z.infer<typeof SimulateViolationResultSchema>;
+
+export const DemoBootstrapResultSchema = z.object({
+  seeded: z.literal(true),
+  streamId: z.string().min(1),
+  eventCount: z.number().int().min(1),
+  runId: z.string().min(1),
+  baselineRecoveredMinor: z.number().int().min(0),
+  policyRecoveredMinor: z.number().int().min(0),
+  degraded: z.boolean(),
+});
+export type DemoBootstrapResult = z.infer<typeof DemoBootstrapResultSchema>;

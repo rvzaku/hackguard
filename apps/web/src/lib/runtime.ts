@@ -13,6 +13,7 @@ import {
 import {
   createPostgresPool,
   PostgresAuditLogStore,
+  PostgresDecisionStore,
   PostgresPaymentEventStore,
   PostgresReplayStore,
 } from './stores/postgres.js';
@@ -53,6 +54,7 @@ export function buildRuntime(env: RuntimeEnv): Runtime {
       payments: new PostgresPaymentEventStore(sql),
       audit: new PostgresAuditLogStore(sql),
       replays: new PostgresReplayStore(sql),
+      decisions: new PostgresDecisionStore(sql),
       idempotency,
     };
   }
@@ -63,21 +65,27 @@ export function buildScoringClient(env: RuntimeEnv): ScoringSidecarClient {
   return new ScoringSidecarClient(env.SCORING_BASE_URL);
 }
 
-let cached: Runtime | null = null;
-let cachedScoring: ScoringSidecarClient | null = null;
+// Next.js bundles each route separately, so module-level singletons are NOT
+// shared across route handlers. Cache on globalThis (standard Next pattern)
+// so every route composes onto the same runtime/stores.
+const globalForRuntime = globalThis as unknown as {
+  __hackguardRuntime?: Runtime;
+  __hackguardScoring?: ScoringSidecarClient | null;
+};
 
 export function getRuntime(): Runtime {
-  cached ??= buildRuntime(envFrom(process.env));
-  return cached;
+  globalForRuntime.__hackguardRuntime ??= buildRuntime(envFrom(process.env));
+  return globalForRuntime.__hackguardRuntime;
 }
 
 export function getScoringClient(): ScoringSidecarClient {
-  cachedScoring ??= buildScoringClient(envFrom(process.env));
-  return cachedScoring;
+  globalForRuntime.__hackguardScoring ??= buildScoringClient(envFrom(process.env));
+  return globalForRuntime.__hackguardScoring;
 }
 
 /** Test seam: swap the process-wide runtime before exercising route handlers. */
 export function setRuntimeForTests(runtime: Runtime, scoring?: ScoringClient): void {
-  cached = runtime;
-  cachedScoring = scoring as ScoringSidecarClient | undefined ?? null;
+  globalForRuntime.__hackguardRuntime = runtime;
+  globalForRuntime.__hackguardScoring =
+    (scoring as ScoringSidecarClient | undefined) ?? null;
 }

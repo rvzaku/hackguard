@@ -10,10 +10,21 @@ from pathlib import Path
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 # Repo-root models/registry, resolved relative to this file so the sidecar
 # finds committed artifacts regardless of the process working directory:
 # <root>/services/scoring/src/scoring/config.py → parents[4] = <root>.
-_DEFAULT_MODEL_DIR = Path(__file__).resolve().parents[4] / "models" / "registry"
+# Falls back to CWD-relative models/registry when the source tree is shallower
+# than the repo layout (e.g. container installs where SCORING_MODEL_DIR is
+# expected to be set explicitly).
+def _default_model_dir() -> Path:
+    try:
+        return Path(__file__).resolve().parents[4] / "models" / "registry"
+    except IndexError:
+        return Path.cwd() / "models" / "registry"
+
+
+_DEFAULT_MODEL_DIR = _default_model_dir()
 
 
 class Settings(BaseSettings):

@@ -16,6 +16,9 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - Sharp edge (macOS): xgboost needs the OpenMP runtime — `brew install libomp` — or every `uv run` touching xgboost fails with a dlopen error.
 - Python test gate includes a coverage floor on the ML core (`scoring.preprocessing`/`policy`/`inference` >=80%, enforced in `scripts/verify-python.sh` and CI).
 - Adversarial eval loop: `npm run eval:loop` regenerates the committed artifact `models/registry/eval-loop-v1/metrics.json` (seeded simulator → baseline-vs-policy grading → deterministic grid hill-climb, `apps/web/src/lib/eval/`). `/api/eval-loop` re-validates that JSON through `EvalLoopArtifactSchema` at request time — regenerate the artifact whenever the simulator/grader change, or the route/UI render stale numbers.
+- E2E: `scripts/verify-e2e.sh` (local, embedded stores) or `--docker` (compose stack) boots the stack and drives the golden path via `scripts/e2e-drive.ts`; recorded passing output lives in `docs/VERIFICATION.md`. UI golden path: `npx playwright test` in `apps/web` (needs `STRIPE_WEBHOOK_SECRET`, set by `playwright.config.ts`).
+- Sharp edge: Next.js bundles each route separately — module-level singletons are NOT shared across route handlers. The composed runtime must stay cached on `globalThis` in `apps/web/src/lib/runtime.ts`; don't revert to plain module variables.
+- Docker: both images build with the repo root as context (`docker compose up --build`); Postgres migrations apply via the initdb mount of `db/migrations`. Scoring image relies on `PYTHONPATH=/app/src` + `SCORING_MODEL_DIR=/models/registry` (see `services/scoring/Dockerfile`).
 
 ## Maintaining this file
 

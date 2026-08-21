@@ -1,11 +1,12 @@
 import postgres from 'postgres';
 
-import type { AuditEntry, PaymentFailedEvent, ReplayEvent } from '@hackguard/contracts';
+import type { AuditEntry, Decision, PaymentFailedEvent, ReplayEvent } from '@hackguard/contracts';
 
 import { AppError } from '../errors.js';
 import type { AuditLogStore } from '../audit/chain.js';
 import {
   scopeKeyFor,
+  type DecisionStore,
   type PaymentEventStore,
   type ReplayRunRecord,
   type ReplayStore,
@@ -155,6 +156,32 @@ export class PostgresReplayStore implements ReplayStore {
     const rows = await this.sql<{ record: ReplayRunRecord }[]>`
       SELECT record FROM replay_runs WHERE run_id = ${runId}`;
     return rows[0]?.record ?? null;
+  }
+
+  async latestRun(): Promise<ReplayRunRecord | null> {
+    const rows = await this.sql<{ record: ReplayRunRecord }[]>`
+      SELECT record FROM replay_runs ORDER BY created_at DESC LIMIT 1`;
+    return rows[0]?.record ?? null;
+  }
+}
+
+interface DecisionRow {
+  record: Decision;
+}
+
+export class PostgresDecisionStore implements DecisionStore {
+  constructor(private readonly sql: postgres.Sql) {}
+
+  async save(decision: Decision): Promise<void> {
+    await this.sql`
+      INSERT INTO decisions (payment_id, record) VALUES (${decision.paymentId}, ${this.sql.json(toJsonValue(decision))})
+      ON CONFLICT (payment_id) DO UPDATE SET record = EXCLUDED.record`;
+  }
+
+  async list(limit = 200): Promise<Decision[]> {
+    const rows = await this.sql<DecisionRow[]>`
+      SELECT record FROM decisions ORDER BY created_at DESC LIMIT ${limit}`;
+    return rows.map((row) => row.record);
   }
 }
 

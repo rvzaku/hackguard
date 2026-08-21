@@ -1,12 +1,23 @@
-import { NextResponse } from 'next/server';
-import { verifyChain } from '@/lib/demo/store';
+import { verifyAuditChain } from '@/lib/audit/chain';
+import { withErrorHandling } from '@/lib/errors';
+import { getRuntime } from '@/lib/runtime';
 
 /**
- * POST /api/audit/verify — tamper detection: recompute the hash chain over the
- * ledger and report the first broken sequence number, if any. Demo-backed
- * until WS-B's chain verifier lands; the response shape is the contract the
- * dashboard's Verify-chain button consumes.
+ * POST /api/audit/verify — tamper detection: full-scan recomputation of the
+ * hash chain over the persisted ledger (plan §6 security tests). The response
+ * shape is the contract the dashboard's Verify-chain button consumes.
  */
-export async function POST() {
-  return NextResponse.json(verifyChain());
-}
+export const POST = withErrorHandling(async (): Promise<Response> => {
+  const runtime = getRuntime();
+  const entries = await runtime.audit.all();
+  const verdict = verifyAuditChain(entries);
+  return Response.json(
+    {
+      valid: verdict.valid,
+      checkedCount: entries.length,
+      brokenAtSeq: verdict.firstBadSeq ?? null,
+      reason: verdict.reason ?? null,
+    },
+    { status: 200 },
+  );
+});

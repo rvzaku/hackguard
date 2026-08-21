@@ -1,0 +1,62 @@
+# HackGuard — one-command local stack (plan §6: cold-clone quickstart).
+#   docker compose up --build
+#   → dashboard http://localhost:3000 · scoring http://localhost:8000/healthz
+#
+# Postgres has the audit migration (db/migrations) applied automatically via
+# the initdb mount; the web app persists decisions + the audit ledger there.
+# No Docker? See README "no-Docker path" (in-memory mode works out of the box).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: hackguard
+      POSTGRES_PASSWORD: hackguard
+      POSTGRES_DB: hackguard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Applies 0001_audit_log.sql, 0002_backend_core.sql, 0003_decisions.sql
+      # in lexical order on first boot.
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5433:5432" # host access for psql/debugging; container-internal otherwise
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hackguard -d hackguard"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  scoring:
+    build:
+      context: .
+      dockerfile: services/scoring/Dockerfile
+    environment:
+      SCORING_ENV: production
+      SCORING_LOG_LEVEL: info
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      DATABASE_URL: postgres://hackguard:hackguard@postgres:5432/hackguard
+      SCORING_BASE_URL: http://scoring:8000
+      # Test mode ONLY (plan §8). Override via .env when using a real test secret.
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_demo_local}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      scoring:
+        condition: service_healthy
+
+volumes:
+  pgdata:

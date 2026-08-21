@@ -59,6 +59,7 @@ export const POST = withErrorHandling(async (request: Request): Promise<Response
     scopeKey: scopeKeyFor(event),
     scoring: getScoringClient(),
   });
+  await runtime.decisions.save(outcome.decision);
 
   const entry = await appendAuditEntry(runtime.audit, {
     decisionRef: outcome.decision.paymentId,

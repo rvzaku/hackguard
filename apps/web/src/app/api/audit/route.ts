@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
-import { getDemoStore } from '@/lib/demo/store';
+import { withErrorHandling } from '@/lib/errors';
+import { getRuntime } from '@/lib/runtime';
 
 /**
- * GET /api/audit — append-only, hash-chained compliance ledger (plan §4).
- * Backed by the demo seed until WS-B's Postgres-backed audit endpoint lands.
+ * GET /api/audit — append-only, hash-chained compliance ledger (plan §4),
+ * backed by the runtime audit store (Postgres audit_log when DATABASE_URL is
+ * set; the DB trigger in db/migrations/0001_audit_log.sql enforces
+ * append-only at the storage layer).
  */
-export async function GET() {
-  return NextResponse.json({ entries: getDemoStore().audit });
-}
+export const GET = withErrorHandling(async (): Promise<Response> => {
+  const runtime = getRuntime();
+  const entries = await runtime.audit.all();
+  return Response.json({ entries }, { status: 200 });
+});

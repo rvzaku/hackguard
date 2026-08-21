@@ -3,11 +3,13 @@ import {
   AuditLogSchema,
   ChainVerificationSchema,
   DecisionFeedSchema,
+  DemoBootstrapResultSchema,
   ReplaySeriesSchema,
   SimulateViolationResultSchema,
   type AuditLog,
   type ChainVerification,
   type DecisionFeed,
+  type DemoBootstrapResult,
   type ReplaySeries,
   type SimulateViolationResult,
 } from './types';
@@ -81,6 +83,7 @@ export interface ApiClient {
   verifyChain(options?: RequestOptions): Promise<ChainVerification>;
   simulateViolatingRetry(options?: RequestOptions): Promise<SimulateViolationResult>;
   getEvalLoop(options?: RequestOptions): Promise<EvalLoopArtifact>;
+  runDemoBootstrap(options?: RequestOptions): Promise<DemoBootstrapResult>;
 }
 
 export function createApiClient(fetchImpl: typeof fetch = fetch): ApiClient {
@@ -96,6 +99,8 @@ export function createApiClient(fetchImpl: typeof fetch = fetch): ApiClient {
         ...options,
       }),
     getEvalLoop: (options) => request(fetchImpl, '/api/eval-loop', EvalLoopArtifactSchema, options),
+    runDemoBootstrap: (options) =>
+      request(fetchImpl, '/api/demo/bootstrap', DemoBootstrapResultSchema, { method: 'POST', ...options }),
   };
 }
 

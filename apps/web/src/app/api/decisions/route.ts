@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
-import { getDemoStore } from '@/lib/demo/store';
+import { withErrorHandling } from '@/lib/errors';
+import { getRuntime } from '@/lib/runtime';
 
 /**
  * GET /api/decisions — decision feed + stored SHAP explanations (plan §3).
- * Backed by the demo seed until WS-B's real decisions endpoint lands; the
- * dashboard consumes this route only through the typed client.
+ * Backed by the runtime decision store: every decision the webhook pipeline
+ * produced (triage -> guardrail -> scheduler) is persisted contract-shaped.
  */
-export async function GET() {
-  return NextResponse.json({ decisions: getDemoStore().decisions });
-}
+export const GET = withErrorHandling(async (): Promise<Response> => {
+  const runtime = getRuntime();
+  const decisions = await runtime.decisions.list();
+  return Response.json({ decisions }, { status: 200 });
+});
