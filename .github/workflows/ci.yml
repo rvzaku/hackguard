@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  node:
+    name: Node — lint, typecheck, test (web + contracts)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run verify:node
+
+  python:
+    name: Python — ruff, mypy --strict, pytest (scoring)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        working-directory: services/scoring
+        run: uv sync --dev
+      - name: Lint (ruff)
+        working-directory: services/scoring
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Typecheck (mypy --strict)
+        working-directory: services/scoring
+        run: uv run mypy --strict src tests
+      - name: Test (pytest)
+        working-directory: services/scoring
+        run: uv run pytest

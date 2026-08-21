@@ -1,0 +1,305 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HackGuard Contracts",
+    "version": "0.1.0",
+    "description": "Single source of truth for HackGuard shared data contracts (plan §4). TS side: Zod schemas in @hackguard/contracts. Python side: Pydantic models generated from this document."
+  },
+  "components": {
+    "schemas": {
+      "PaymentFailedEvent": {
+        "type": "object",
+        "properties": {
+          "stripeId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stripe event or invoice item id, e.g. evt_..."
+          },
+          "customerId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stripe customer id, e.g. cus_..."
+          },
+          "amountMinor": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0,
+            "description": "Amount in minor units (cents), e.g. 4900 = $49.00"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[a-z]{3}$",
+            "description": "ISO 4217 currency code (lowercase)"
+          },
+          "declineCode": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Stripe decline code, e.g. \"insufficient_funds\""
+          },
+          "attempt": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-based retry attempt number for this invoice"
+          },
+          "cardBrand": {
+            "type": "string",
+            "enum": [
+              "visa",
+              "mastercard",
+              "amex",
+              "discover",
+              "jcb",
+              "diners",
+              "unionpay",
+              "unknown"
+            ],
+            "description": "Card brand from the Stripe payment method"
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Failure timestamp, RFC 3339 with offset"
+          }
+        },
+        "required": [
+          "stripeId",
+          "customerId",
+          "amountMinor",
+          "currency",
+          "declineCode",
+          "attempt",
+          "cardBrand",
+          "ts"
+        ],
+        "additionalProperties": false
+      },
+      "Decision": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Internal id of the failed payment this decision covers"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "RETRY",
+              "SUPPRESS",
+              "ASK_CUSTOMER"
+            ]
+          },
+          "scheduledFor": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Planned retry moment; required iff action === RETRY"
+          },
+          "pRecover": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Model-estimated probability of recovery"
+          },
+          "shapTop": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "feature": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "contribution": {
+                  "type": "number",
+                  "description": "SHAP value: signed contribution to P(recover) log-odds"
+                }
+              },
+              "required": [
+                "feature",
+                "contribution"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 5,
+            "description": "Top-5 SHAP feature contributions for the explanation panel"
+          },
+          "ruleHits": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": "Compliance rule citations that fired, e.g. \"VISA-CAT1-NEVER-RETRY\""
+          },
+          "modelVersion": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Versioned model artifact id, e.g. \"propensity-v0.1.0\""
+          }
+        },
+        "required": [
+          "paymentId",
+          "action",
+          "pRecover",
+          "shapTop",
+          "ruleHits",
+          "modelVersion"
+        ],
+        "additionalProperties": false
+      },
+      "AuditEntry": {
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Application-assigned monotonically increasing sequence number (0 = genesis)"
+          },
+          "prevHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "Hash of the previous entry; all-zero hex for the genesis entry"
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "description": "SHA-256 over (seq, prevHash, decisionRef, actor, ts) — tamper-evident"
+          },
+          "decisionRef": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Id of the Decision this entry attests"
+          },
+          "actor": {
+            "type": "string",
+            "enum": [
+              "MODEL",
+              "RULE",
+              "HUMAN"
+            ]
+          },
+          "ts": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "seq",
+          "prevHash",
+          "hash",
+          "decisionRef",
+          "actor",
+          "ts"
+        ],
+        "additionalProperties": false
+      },
+      "ReplayEvent": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Dedupable id, stable across replay runs"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "PAYMENT_FAILED",
+              "PAYMENT_RECOVERED",
+              "CARD_UPDATED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "stripe-test-capture",
+              "synthetic-seed"
+            ],
+            "description": "Provenance: real Stripe test-mode capture or clearly-labeled synthetic seed"
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Original capture time (RFC 3339)"
+          },
+          "paymentFailed": {
+            "type": "object",
+            "properties": {
+              "stripeId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stripe event or invoice item id, e.g. evt_..."
+              },
+              "customerId": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stripe customer id, e.g. cus_..."
+              },
+              "amountMinor": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0,
+                "description": "Amount in minor units (cents), e.g. 4900 = $49.00"
+              },
+              "currency": {
+                "type": "string",
+                "pattern": "^[a-z]{3}$",
+                "description": "ISO 4217 currency code (lowercase)"
+              },
+              "declineCode": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stripe decline code, e.g. \"insufficient_funds\""
+              },
+              "attempt": {
+                "type": "integer",
+                "minimum": 1,
+                "description": "1-based retry attempt number for this invoice"
+              },
+              "cardBrand": {
+                "type": "string",
+                "enum": [
+                  "visa",
+                  "mastercard",
+                  "amex",
+                  "discover",
+                  "jcb",
+                  "diners",
+                  "unionpay",
+                  "unknown"
+                ],
+                "description": "Card brand from the Stripe payment method"
+              },
+              "ts": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Failure timestamp, RFC 3339 with offset"
+              }
+            },
+            "required": [
+              "stripeId",
+              "customerId",
+              "amountMinor",
+              "currency",
+              "declineCode",
+              "attempt",
+              "cardBrand",
+              "ts"
+            ],
+            "additionalProperties": false,
+            "nullable": true,
+            "description": "Present iff kind === PAYMENT_FAILED"
+          }
+        },
+        "required": [
+          "eventId",
+          "kind",
+          "source",
+          "capturedAt"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

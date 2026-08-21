@@ -1,0 +1,31 @@
+{
+  "name": "hackguard",
+  "private": true,
+  "version": "0.1.0",
+  "description": "HackGuard — decision brain above Stripe's built-in retries (monorepo scaffold)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "npm install && bash scripts/setup-python.sh",
+    "verify": "npm run verify:node && npm run verify:python",
+    "verify:node": "npm run lint --workspaces --if-present && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "verify:python": "bash scripts/verify-python.sh",
+    "contracts:openapi": "npm run generate -w @hackguard/contracts",
+    "contracts:pydantic": "bash scripts/gen-pydantic.sh",
+    "format": "prettier --write \"**/*.{ts,tsx,mjs,json,md,css}\" --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "eslint": "^9.30.0",
+    "eslint-config-next": "^15.3.4",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
