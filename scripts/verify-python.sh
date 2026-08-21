@@ -12,4 +12,8 @@ fi
 uv run ruff check .
 uv run ruff format --check .
 uv run mypy --strict src tests
-uv run pytest -q
+# Coverage gate scoped to the ML core (WS-A acceptance: >=80% on
+# preprocessing + policy).
+uv run pytest -q \
+  --cov=scoring.preprocessing --cov=scoring.policy --cov=scoring.inference \
+  --cov-report=term-missing --cov-fail-under=80

@@ -1,0 +1,40 @@
+{
+  "version": "propensity-v1.0.0",
+  "featureNames": [
+    "amount_log",
+    "int_rate",
+    "term_months",
+    "emp_length_years",
+    "dti",
+    "delinq_2yrs",
+    "inq_last_6mths",
+    "revol_util",
+    "open_acc",
+    "total_acc"
+  ],
+  "baseRate": 0.8121,
+  "trainedAt": "2026-08-21T06:58:40+00:00",
+  "dataSource": "https://resources.lendingclub.com/LoanStats3a.csv.zip",
+  "dataSha256": "9af5ac078f1a22879ed026fb5ba394c9f76badd917e97b6d9ec59f34f535db69",
+  "trainRows": 10100,
+  "seed": 42,
+  "params": {
+    "objective": "binary:logistic",
+    "eval_metric": [
+      "logloss",
+      "auc",
+      "aucpr"
+    ],
+    "tree_method": "hist",
+    "max_depth": 4,
+    "eta": 0.1,
+    "min_child_weight": 5.0,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 1.0,
+    "num_boost_round": 400,
+    "early_stopping_rounds": 30,
+    "best_iteration": 21,
+    "seed": 42
+  }
+}

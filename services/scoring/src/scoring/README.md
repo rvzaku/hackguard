@@ -1,6 +1,15 @@
-"""Marker so mypy/ruff treat this directory as part of the package.
+"""HackGuard scoring sidecar package.
 
-contracts_gen.py is GENERATED from packages/contracts/openapi.json by
-scripts/gen-pydantic.sh — do not edit by hand. It is created during setup;
-run `npm run contracts:pydantic` from the repo root if it is missing.
+Modules:
+- config          env-driven settings (incl. pinned model version/dir)
+- contracts_gen   GENERATED from packages/contracts/openapi.json — do not edit
+- preprocessing   payment→model feature mapping (shared with training)
+- policy          published-prior timing factors (cited, deterministic)
+- model_registry  versioned artifact loading, pinned by version
+- inference       propensity + TreeSHAP + per-moment P(recover)
+- api_models      sidecar-local request/response models
+- main            FastAPI app (/healthz, /v1/score, /v1/score/moments)
+
+Methodology: docs/MODEL.md. Training: models/propensity/train.py via
+`npm run model:train` / `npm run model:train:full`.
 """

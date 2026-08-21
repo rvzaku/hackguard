@@ -17,6 +17,8 @@
     "verify:python": "bash scripts/verify-python.sh",
     "contracts:openapi": "npm run generate -w @hackguard/contracts",
     "contracts:pydantic": "bash scripts/gen-pydantic.sh",
+    "model:train": "bash scripts/train-model.sh",
+    "model:train:full": "bash scripts/train-model.sh --full",
     "format": "prettier --write \"**/*.{ts,tsx,mjs,json,md,css}\" --ignore-path .gitignore"
   },
   "devDependencies": {

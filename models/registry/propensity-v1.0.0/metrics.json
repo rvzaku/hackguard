@@ -1,0 +1,160 @@
+{
+  "modelVersion": "propensity-v1.0.0",
+  "trainedAt": "2026-08-21T06:58:40+00:00",
+  "data": {
+    "source": "https://resources.lendingclub.com/LoanStats3a.csv.zip",
+    "sha256": "9af5ac078f1a22879ed026fb5ba394c9f76badd917e97b6d9ec59f34f535db69",
+    "cohortRows": 16834,
+    "fullCohortRows": 16834,
+    "sampleMode": null,
+    "trainRows": 10100,
+    "valRows": 3366,
+    "testRows": 3368,
+    "trainBaseRate": 0.8121,
+    "testBaseRate": 0.8171
+  },
+  "params": {
+    "objective": "binary:logistic",
+    "eval_metric": [
+      "logloss",
+      "auc",
+      "aucpr"
+    ],
+    "tree_method": "hist",
+    "max_depth": 4,
+    "eta": 0.1,
+    "min_child_weight": 5.0,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 1.0,
+    "num_boost_round": 400,
+    "early_stopping_rounds": 30,
+    "best_iteration": 21,
+    "seed": 42
+  },
+  "test": {
+    "model": {
+      "name": "xgboost_propensity_v1",
+      "auc": 0.6311,
+      "prAuc": 0.8796,
+      "brier": 0.1456,
+      "liftVsConstantAuc": 0.1311,
+      "liftVsConstantPrAuc": 0.0625
+    },
+    "baselines": [
+      {
+        "name": "constant_base_rate",
+        "auc": 0.5,
+        "prAuc": 0.8178,
+        "brier": 0.14945,
+        "liftVsConstantAuc": 0.0,
+        "liftVsConstantPrAuc": 0.0007
+      },
+      {
+        "name": "rule_delinq_2yrs_eq_0",
+        "auc": 0.496,
+        "prAuc": 0.8195,
+        "brier": 0.36758,
+        "liftVsConstantAuc": -0.004,
+        "liftVsConstantPrAuc": 0.0024
+      },
+      {
+        "name": "rule_int_rate_le_13",
+        "auc": 0.5804,
+        "prAuc": 0.8507,
+        "brier": 0.46645,
+        "liftVsConstantAuc": 0.0804,
+        "liftVsConstantPrAuc": 0.0336
+      },
+      {
+        "name": "rule_dti_le_15",
+        "auc": 0.5324,
+        "prAuc": 0.8351,
+        "brier": 0.413,
+        "liftVsConstantAuc": 0.0324,
+        "liftVsConstantPrAuc": 0.018
+      },
+      {
+        "name": "rule_sum_of_three",
+        "auc": 0.5715,
+        "prAuc": 0.8533,
+        "brier": null,
+        "liftVsConstantAuc": 0.0715,
+        "liftVsConstantPrAuc": 0.0362
+      }
+    ],
+    "calibrationCurve": [
+      {
+        "binLow": 0.0,
+        "binHigh": 0.1,
+        "count": 0,
+        "meanPredicted": null,
+        "observedRate": null
+      },
+      {
+        "binLow": 0.1,
+        "binHigh": 0.2,
+        "count": 0,
+        "meanPredicted": null,
+        "observedRate": null
+      },
+      {
+        "binLow": 0.2,
+        "binHigh": 0.3,
+        "count": 0,
+        "meanPredicted": null,
+        "observedRate": null
+      },
+      {
+        "binLow": 0.3,
+        "binHigh": 0.4,
+        "count": 2,
+        "meanPredicted": 0.35937,
+        "observedRate": 1.0
+      },
+      {
+        "binLow": 0.4,
+        "binHigh": 0.5,
+        "count": 7,
+        "meanPredicted": 0.4616,
+        "observedRate": 0.57143
+      },
+      {
+        "binLow": 0.5,
+        "binHigh": 0.6,
+        "count": 78,
+        "meanPredicted": 0.56466,
+        "observedRate": 0.69231
+      },
+      {
+        "binLow": 0.6,
+        "binHigh": 0.7,
+        "count": 349,
+        "meanPredicted": 0.66006,
+        "observedRate": 0.71347
+      },
+      {
+        "binLow": 0.7,
+        "binHigh": 0.8,
+        "count": 766,
+        "meanPredicted": 0.75742,
+        "observedRate": 0.75457
+      },
+      {
+        "binLow": 0.8,
+        "binHigh": 0.9,
+        "count": 1704,
+        "meanPredicted": 0.85202,
+        "observedRate": 0.84566
+      },
+      {
+        "binLow": 0.9,
+        "binHigh": 1.0,
+        "count": 462,
+        "meanPredicted": 0.92076,
+        "observedRate": 0.91775
+      }
+    ],
+    "expectedCalibrationError": 0.01338
+  }
+}

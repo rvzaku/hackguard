@@ -37,6 +37,11 @@ jobs:
       - name: Typecheck (mypy --strict)
         working-directory: services/scoring
         run: uv run mypy --strict src tests
-      - name: Test (pytest)
+      - name: Test (pytest, ML-core coverage >=80%)
         working-directory: services/scoring
-        run: uv run pytest
+        run: |
+          uv run pytest \
+            --cov=scoring.preprocessing --cov=scoring.policy --cov=scoring.inference \
+            --cov-report=term-missing --cov-fail-under=80
+      - name: Reproducible training (small-sample smoke)
+        run: npm run model:train

@@ -29,3 +29,7 @@ htmlcov/
 # Playwright
 test-results/
 playwright-report/
+
+# Model training: data cache + smoke-run outputs (registry artifacts ARE committed)
+models/.cache/
+var/
