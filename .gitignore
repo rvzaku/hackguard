@@ -26,9 +26,10 @@ htmlcov/
 .idea/
 .vscode/
 
-# Playwright
+# Playwright & coverage output
 test-results/
 playwright-report/
+coverage/
 
 # Model training: data cache + smoke-run outputs (registry artifacts ARE committed)
 models/.cache/
