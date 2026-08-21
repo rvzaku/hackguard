@@ -12,6 +12,9 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - Sharp edge: `datamodel-codegen` output formatting depends on the `--output` path; always generate to a temp file and copy (`scripts/gen-pydantic.sh` does this) or the drift test fails spuriously.
 - Backend core (webhook/triage/compliance/scheduler/audit/replay) lives in `apps/web/src/lib`; see `docs/architecture.md` §Backend core for the module map. Route tests inject stores via `setRuntimeForTests()` (`src/lib/runtime.ts`) — never stub globals.
 - Web coverage gates (≥80% on triage/compliance/scheduler/audit) run via `vitest --coverage` in `apps/web` (`npm run test -w @hackguard/web`); adding files under those dirs pulls them into the threshold.
+- Model training: `npm run model:train` (seeded small-sample smoke, runs in CI) or `npm run model:train:full` (full cohort, writes the committed `models/registry/` artifact). Data source is SHA-256-pinned — provenance and license in `docs/DATA.md`; methodology in `docs/MODEL.md`.
+- Sharp edge (macOS): xgboost needs the OpenMP runtime — `brew install libomp` — or every `uv run` touching xgboost fails with a dlopen error.
+- Python test gate includes a coverage floor on the ML core (`scoring.preprocessing`/`policy`/`inference` >=80%, enforced in `scripts/verify-python.sh` and CI).
 
 ## Maintaining this file
 
