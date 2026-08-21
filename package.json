@@ -19,6 +19,7 @@
     "contracts:pydantic": "bash scripts/gen-pydantic.sh",
     "model:train": "bash scripts/train-model.sh",
     "model:train:full": "bash scripts/train-model.sh --full",
+    "eval:loop": "tsx apps/web/scripts/run-eval-loop.ts",
     "format": "prettier --write \"**/*.{ts,tsx,mjs,json,md,css}\" --ignore-path .gitignore"
   },
   "devDependencies": {

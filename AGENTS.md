@@ -15,6 +15,7 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - Model training: `npm run model:train` (seeded small-sample smoke, runs in CI) or `npm run model:train:full` (full cohort, writes the committed `models/registry/` artifact). Data source is SHA-256-pinned — provenance and license in `docs/DATA.md`; methodology in `docs/MODEL.md`.
 - Sharp edge (macOS): xgboost needs the OpenMP runtime — `brew install libomp` — or every `uv run` touching xgboost fails with a dlopen error.
 - Python test gate includes a coverage floor on the ML core (`scoring.preprocessing`/`policy`/`inference` >=80%, enforced in `scripts/verify-python.sh` and CI).
+- Adversarial eval loop: `npm run eval:loop` regenerates the committed artifact `models/registry/eval-loop-v1/metrics.json` (seeded simulator → baseline-vs-policy grading → deterministic grid hill-climb, `apps/web/src/lib/eval/`). `/api/eval-loop` re-validates that JSON through `EvalLoopArtifactSchema` at request time — regenerate the artifact whenever the simulator/grader change, or the route/UI render stale numbers.
 
 ## Maintaining this file
 

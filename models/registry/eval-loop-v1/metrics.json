@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-21T07:51:22.731Z",
+  "seed": 20260822,
+  "rounds": [
+    {
+      "round": 1,
+      "policyVersion": "policy-v1",
+      "params": {
+        "firstOffsetHours": 24,
+        "stepHours": 72,
+        "paydaySnapDays": 0
+      },
+      "metrics": {
+        "recoveredCount": 23,
+        "retryableCount": 84,
+        "recoveryRate": 0.27380952380952384,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 158877,
+        "netValueMinor": 158877
+      },
+      "improved": false
+    },
+    {
+      "round": 2,
+      "policyVersion": "policy-v2",
+      "params": {
+        "firstOffsetHours": 48,
+        "stepHours": 72,
+        "paydaySnapDays": 0
+      },
+      "metrics": {
+        "recoveredCount": 25,
+        "retryableCount": 84,
+        "recoveryRate": 0.2976190476190476,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 196756,
+        "netValueMinor": 196756
+      },
+      "improved": true
+    },
+    {
+      "round": 3,
+      "policyVersion": "policy-v3",
+      "params": {
+        "firstOffsetHours": 48,
+        "stepHours": 48,
+        "paydaySnapDays": 0
+      },
+      "metrics": {
+        "recoveredCount": 32,
+        "retryableCount": 84,
+        "recoveryRate": 0.38095238095238093,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 232877,
+        "netValueMinor": 232877
+      },
+      "improved": true
+    },
+    {
+      "round": 4,
+      "policyVersion": "policy-v4",
+      "params": {
+        "firstOffsetHours": 48,
+        "stepHours": 48,
+        "paydaySnapDays": 1
+      },
+      "metrics": {
+        "recoveredCount": 33,
+        "retryableCount": 84,
+        "recoveryRate": 0.39285714285714285,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 242973,
+        "netValueMinor": 242973
+      },
+      "improved": true
+    },
+    {
+      "round": 5,
+      "policyVersion": "policy-v5",
+      "params": {
+        "firstOffsetHours": 48,
+        "stepHours": 48,
+        "paydaySnapDays": 1
+      },
+      "metrics": {
+        "recoveredCount": 33,
+        "retryableCount": 84,
+        "recoveryRate": 0.39285714285714285,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 242973,
+        "netValueMinor": 242973
+      },
+      "improved": false
+    },
+    {
+      "round": 6,
+      "policyVersion": "policy-v6",
+      "params": {
+        "firstOffsetHours": 48,
+        "stepHours": 48,
+        "paydaySnapDays": 1
+      },
+      "metrics": {
+        "recoveredCount": 33,
+        "retryableCount": 84,
+        "recoveryRate": 0.39285714285714285,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 242973,
+        "netValueMinor": 242973
+      },
+      "improved": false
+    }
+  ],
+  "baselineVersion": "baseline-fixed-schedule-v1",
+  "baselineMetrics": {
+    "recoveredCount": 30,
+    "retryableCount": 84,
+    "recoveryRate": 0.35714285714285715,
+    "complianceViolations": 100,
+    "penaltyFeeMinor": 99340,
+    "recoveredAmountMinor": 225753,
+    "netValueMinor": 126413
+  },
+  "perScenarioFinal": [
+    {
+      "scenario": "payday-timing",
+      "policy": {
+        "recoveredCount": 6,
+        "retryableCount": 28,
+        "recoveryRate": 0.21428571428571427,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 39293,
+        "netValueMinor": 39293
+      },
+      "baseline": {
+        "recoveredCount": 4,
+        "retryableCount": 28,
+        "recoveryRate": 0.14285714285714285,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 25978,
+        "netValueMinor": 25978
+      }
+    },
+    {
+      "scenario": "penalty-traps",
+      "policy": {
+        "recoveredCount": 0,
+        "retryableCount": 0,
+        "recoveryRate": 0,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 0,
+        "netValueMinor": 0
+      },
+      "baseline": {
+        "recoveredCount": 0,
+        "retryableCount": 0,
+        "recoveryRate": 0,
+        "complianceViolations": 30,
+        "penaltyFeeMinor": 45000,
+        "recoveredAmountMinor": 0,
+        "netValueMinor": -45000
+      }
+    },
+    {
+      "scenario": "cap-exceed",
+      "policy": {
+        "recoveredCount": 9,
+        "retryableCount": 20,
+        "recoveryRate": 0.45,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 73748,
+        "netValueMinor": 73748
+      },
+      "baseline": {
+        "recoveredCount": 11,
+        "retryableCount": 20,
+        "recoveryRate": 0.55,
+        "complianceViolations": 34,
+        "penaltyFeeMinor": 340,
+        "recoveredAmountMinor": 83848,
+        "netValueMinor": 83508
+      }
+    },
+    {
+      "scenario": "hostile-ordering",
+      "policy": {
+        "recoveredCount": 5,
+        "retryableCount": 12,
+        "recoveryRate": 0.4166666666666667,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 48801,
+        "netValueMinor": 48801
+      },
+      "baseline": {
+        "recoveredCount": 5,
+        "retryableCount": 12,
+        "recoveryRate": 0.4166666666666667,
+        "complianceViolations": 36,
+        "penaltyFeeMinor": 54000,
+        "recoveredAmountMinor": 48801,
+        "netValueMinor": -5199
+      }
+    },
+    {
+      "scenario": "mixed-tenure",
+      "policy": {
+        "recoveredCount": 13,
+        "retryableCount": 24,
+        "recoveryRate": 0.5416666666666666,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 81131,
+        "netValueMinor": 81131
+      },
+      "baseline": {
+        "recoveredCount": 10,
+        "retryableCount": 24,
+        "recoveryRate": 0.4166666666666667,
+        "complianceViolations": 0,
+        "penaltyFeeMinor": 0,
+        "recoveredAmountMinor": 67126,
+        "netValueMinor": 67126
+      }
+    }
+  ],
+  "summary": {
+    "finalPolicyVersion": "policy-v6",
+    "recoveryRateFirst": 0.27380952380952384,
+    "recoveryRateFinal": 0.39285714285714285,
+    "violationsFinal": 0,
+    "penaltyFeeMinorFinal": 0,
+    "baselinePenaltyFeeMinor": 99340
+  },
+  "methodology": "counterfactual estimation on seeded adversarial streams — deterministic, reproducible, disclosed"
+}

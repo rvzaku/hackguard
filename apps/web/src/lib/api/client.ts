@@ -11,6 +11,7 @@ import {
   type ReplaySeries,
   type SimulateViolationResult,
 } from './types';
+import { EvalLoopArtifactSchema, type EvalLoopArtifact } from '../eval/artifact';
 
 /**
  * Typed API client — the ONLY way the dashboard reads data. Every response is
@@ -79,6 +80,7 @@ export interface ApiClient {
   getAuditLog(options?: RequestOptions): Promise<AuditLog>;
   verifyChain(options?: RequestOptions): Promise<ChainVerification>;
   simulateViolatingRetry(options?: RequestOptions): Promise<SimulateViolationResult>;
+  getEvalLoop(options?: RequestOptions): Promise<EvalLoopArtifact>;
 }
 
 export function createApiClient(fetchImpl: typeof fetch = fetch): ApiClient {
@@ -93,7 +95,8 @@ export function createApiClient(fetchImpl: typeof fetch = fetch): ApiClient {
         method: 'POST',
         ...options,
       }),
+    getEvalLoop: (options) => request(fetchImpl, '/api/eval-loop', EvalLoopArtifactSchema, options),
   };
 }
 
-export type { AuditEntry, Decision };
+export type { AuditEntry, Decision, EvalLoopArtifact };

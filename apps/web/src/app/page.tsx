@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { createApiClient } from '@/lib/api/client';
 import { useApiResource } from '@/hooks/useApiResource';
 import { DecisionFeed } from '@/components/DecisionFeed';
+import { EvalLoopPanel } from '@/components/EvalLoopPanel';
 import { ExplanationPanel } from '@/components/ExplanationPanel';
 import { ReplayCounters } from '@/components/ReplayCounters';
 import { ComplianceLedger } from '@/components/ComplianceLedger';
@@ -23,6 +24,7 @@ function SectionHeading({ title, subtitle }: { title: string; subtitle?: string 
 export default function Home() {
   const decisions = useApiResource((signal) => api.getDecisions({ signal }), { pollMs: 4000 });
   const replay = useApiResource((signal) => api.getReplay({ signal }), { pollMs: 3000 });
+  const evalLoop = useApiResource((signal) => api.getEvalLoop({ signal }), { pollMs: 10000 });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const selectedDecision = useMemo(
@@ -85,6 +87,22 @@ export default function Home() {
           <ReplayCounters replay={replay.data} />
         ) : (
           <EmptyState title="No replay data" />
+        )}
+      </section>
+
+      <section aria-label="Adversarial eval loop" className="rounded-lg border border-neutral-800 bg-neutral-900/40 p-4">
+        <SectionHeading
+          title="Adversarial eval loop — policy improving over rounds"
+          subtitle="Seeded adversarial streams · baseline fixed schedule vs tuned timing policy, round by round"
+        />
+        {evalLoop.loading ? (
+          <LoadingSkeleton rows={3} />
+        ) : evalLoop.error ? (
+          <ErrorState error={evalLoop.error} onRetry={evalLoop.refresh} />
+        ) : evalLoop.data ? (
+          <EvalLoopPanel artifact={evalLoop.data} />
+        ) : (
+          <EmptyState title="No eval-loop artifact" hint="Run `npm run eval:loop` to generate it." />
         )}
       </section>
 
