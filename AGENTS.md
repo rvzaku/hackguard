@@ -19,6 +19,7 @@ This file is the project's committed home for project-intrinsic agent knowledge:
 - E2E: `scripts/verify-e2e.sh` (local, embedded stores) or `--docker` (compose stack) boots the stack and drives the golden path via `scripts/e2e-drive.ts`; recorded passing output lives in `docs/VERIFICATION.md`. UI golden path: `npx playwright test` in `apps/web` (needs `STRIPE_WEBHOOK_SECRET`, set by `playwright.config.ts`).
 - Sharp edge: Next.js bundles each route separately — module-level singletons are NOT shared across route handlers. The composed runtime must stay cached on `globalThis` in `apps/web/src/lib/runtime.ts`; don't revert to plain module variables.
 - Docker: both images build with the repo root as context (`docker compose up --build`); Postgres migrations apply via the initdb mount of `db/migrations`. Scoring image relies on `PYTHONPATH=/app/src` + `SCORING_MODEL_DIR=/models/registry` (see `services/scoring/Dockerfile`).
+- Production deploy: Vercel project `getyourfit/hackathon`, live at https://hackathon-getyourfit.vercel.app (CLI: `vercel deploy --prod --scope getyourfit`). Env on the project: only `STRIPE_WEBHOOK_SECRET` (test value `whsec_hackguard_demo_2026`, set 2026-08-22). No `SCORING_BASE_URL` and no deployed sidecar → cloud runs in disclosed degraded mode (published-curve fallback, actor RULE, no SHAP); no `DATABASE_URL` → in-memory stores per serverless instance, so decision-feed rows can fragment across instances (re-send events to converge). Pitch package in `docs/pitch/` documents all of this.
 
 ## Maintaining this file
 
